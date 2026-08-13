@@ -1,0 +1,11 @@
+﻿apiVersion: v2
+name: argocd
+description: "Production-ready Argo CD Helm wrapper chart for GitOps self-management."
+type: application
+version: 0.1.0
+appVersion: "3.5.0"
+dependencies:
+  - name: argo-cd
+    repository: https://argoproj.github.io/argo-helm
+    version: 10.3.2
+    condition: argo-cd.enabled

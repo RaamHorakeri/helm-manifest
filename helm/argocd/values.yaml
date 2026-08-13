@@ -1,0 +1,85 @@
+﻿## Production-first default values for Argo CD umbrella chart.
+## Keep common configuration here; environment-specific overrides live under /environments/*.
+
+argo-cd:
+  enabled: true
+
+  # Service exposure: keep ClusterIP; external access should be handled by the cluster Gateway API
+  server:
+    service:
+      type: ClusterIP
+    # scale conservatively for test environment; production overrides may increase replicas
+    replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    # security settings (honor upstream container capabilities)
+    securityContext:
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+
+  repoServer:
+    replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 400m
+        memory: 512Mi
+
+  controller:
+    replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 400m
+        memory: 512Mi
+    revisionHistoryLimit: 5
+
+  applicationSet:
+    enabled: true
+    replicas: 1
+
+  # Redis: leave as default non-HA for test/staging. Make it optional to enable HA in prod.
+  redis:
+    enabled: true
+    usePassword: false
+    # To enable HA later, set sentinel.enabled = true and provide storage (only on sufficiently sized clusters)
+
+  # Pod Disruption Budget common defaults
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+
+  # Metrics and logging
+  metrics:
+    enabled: true
+
+  logging:
+    format: json
+    level: info
+
+  # NetworkPolicy: disabled by default; enable only after testing to ensure Cilium rules permit required traffic
+  networkPolicy:
+    enabled: false
+
+  # Global domain used by some components as a hint; does not create ingress or LB
+  global:
+    domain: argocd.enfec.cloud
+
+  # Resource defaults for components not explicitly listed above
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
