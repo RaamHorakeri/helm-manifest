@@ -17,6 +17,17 @@ argo-cd:
       limits:
         cpu: 500m
         memory: 512Mi
+
+    # Self-management configuration: when enabled, Helm will render Argo CD AppProject
+    # and Application resources as part of the Helm release so no `kubectl apply`
+    # is required to make Argo CD self-managing. Replace repoURL with your repo.
+    selfManagement:
+      enabled: true
+      repoURL: "REPLACE_WITH_REPO_URL"
+      targetRevision: main
+      appPath: "helm/argocd"
+      projectName: argocd
+      applicationName: argocd-self
     # security settings (honor upstream container capabilities)
     securityContext:
       runAsNonRoot: true

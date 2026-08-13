@@ -1,0 +1,30 @@
+{{- if .Values.selfManagement.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.selfManagement.applicationName | quote }}
+  namespace: argocd
+spec:
+  project: {{ .Values.selfManagement.projectName | quote }}
+  source:
+    repoURL: {{ .Values.selfManagement.repoURL | quote }}
+    targetRevision: {{ .Values.selfManagement.targetRevision | quote }}
+    path: {{ .Values.selfManagement.appPath | quote }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+  retry:
+    limit: 5
+    backoff:
+      duration: 5s
+      factor: 2
+      maxDuration: 3m
+---
+{{- end }}

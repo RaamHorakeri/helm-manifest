@@ -1,0 +1,16 @@
+{{- if .Values.selfManagement.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: {{ .Values.selfManagement.projectName | quote }}
+  namespace: argocd
+spec:
+  description: "Project for Argo CD self-managed applications and system-level applications."
+  sourceRepos:
+    - {{ .Values.selfManagement.repoURL | quote }}
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: argocd
+  roles: []
+---
+{{- end }}

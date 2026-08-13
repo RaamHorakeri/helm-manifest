@@ -1,0 +1,48 @@
+## Production overrides for Argo CD
+argo-cd:
+  server:
+    replicas: 2
+    resources:
+      requests:
+        cpu: 250m
+        memory: 256Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+
+  repoServer:
+    replicas: 2
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+      limits:
+        cpu: 800m
+        memory: 1Gi
+
+  controller:
+    replicas: 2
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+      limits:
+        cpu: 800m
+        memory: 1Gi
+    revisionHistoryLimit: 5
+
+  applicationSet:
+    enabled: true
+    replicas: 2
+
+  redis:
+    enabled: true
+    usePassword: true
+    # In production enable secure passwords via your secret management solution
+
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+
+  networkPolicy:
+    enabled: true

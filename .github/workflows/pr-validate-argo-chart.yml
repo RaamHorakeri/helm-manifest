@@ -1,0 +1,36 @@
+name: PR Validate Argo CD Chart
+
+on:
+  pull_request:
+    paths:
+      - 'helm/argocd/**'
+      - '.github/workflows/bump-argo-chart.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: '3.11.0'
+
+      - name: Ensure argo repo
+        run: |
+          helm repo add argo https://argoproj.github.io/argo-helm || true
+          helm repo update
+
+      - name: Helm dependency update
+        run: |
+          helm dependency update ./helm/argocd
+
+      - name: Helm lint
+        run: |
+          helm lint ./helm/argocd
+
+      - name: Helm template render
+        run: |
+          helm template argocd ./helm/argocd --namespace argocd

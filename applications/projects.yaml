@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: argocd
+  namespace: argocd
+spec:
+  description: "Project for Argo CD self-managed applications and system-level applications."
+  sourceRepos:
+    - "REPLACE_WITH_REPO_URL" # restrict to your repo, e.g. https://github.com/org/repo
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: argocd
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  namespaceResourceBlacklist: []
+  roles:
+    - name: readonly
+      policies: |
+        p, proj:argocd:readonly, applications, get, */*, allow
+    - name: admin
+      policies: |
+        p, proj:argocd:admin, *, *, */*, allow
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: argocd
+  namespace: argocd
+spec:
+  description: Argo CD self-management project for bootstrap and chart applications.
+  sourceRepos:
+    - https://github.com/RaamHorakeri/helm-manifest
+  destinations:
+    - namespace: argocd
+      server: https://kubernetes.default.svc

@@ -1,0 +1,9 @@
+## Cluster-specific config (example) - keep cluster endpoints and identifiers here.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-config
+  namespace: argocd
+data:
+  cluster-name: "REPLACE_WITH_CLUSTER_NAME"
+  kube-api-server: "https://REPLACE_WITH_CLUSTER_API"

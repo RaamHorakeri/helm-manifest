@@ -1,0 +1,61 @@
+name: Bump Argo CD chart dependency
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # daily at 03:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  bump-chart:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: '3.11.0'
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml packaging
+
+      - name: Run bump script
+        id: run_bump
+        run: |
+          python scripts/check_and_bump_argo_chart.py \
+            --chart-path helm/argocd/Chart.yaml \
+            --repo-url https://argoproj.github.io/argo-helm \
+            --chart-name argo-cd
+
+      - name: Check for changes
+        id: check
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Pull Request
+        if: steps.check.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore(deps): bump argo-cd chart dependency'
+          title: 'chore(deps): bump argo-cd chart dependency'
+          body: |
+            Automated chart dependency bump for `argo-cd` from the upstream argo-helm repo.
+
+            Please review the `helm lint` and `helm template` results in CI before merging.
+          labels: automated,dependencies
+          branch: automated/bump-argo-chart-${{ github.run_id }}
