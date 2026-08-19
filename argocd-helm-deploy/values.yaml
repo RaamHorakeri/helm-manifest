@@ -1,0 +1,48 @@
+# Values are nested under `argo-cd:` because Argo CD is installed as a
+# Helm dependency on the upstream argo/argo-cd chart (see Chart.yaml).
+#
+# Routing note: the upstream chart ships a native Gateway API HTTPRoute
+# template (server.httproute.*) that correctly targets the HTTP or HTTPS
+# service port depending on configs.params."server.insecure". Used here
+# instead of a second, custom HTTPRoute template - avoids two HTTPRoutes
+# fighting over the same backend.
+
+argo-cd:
+  configs:
+    params:
+      # TLS is handled by the Gateway, not by argocd-server itself.
+      # This is also the fix for argocd login --grpc-web / 404 issues
+      # seen previously - those came from the server expecting TLS while
+      # a non-TLS proxy sat in front of it.
+      server.insecure: true
+
+  server:
+    # The shared Gateway is the single external entry point, so
+    # argocd-server doesn't need its own LoadBalancer.
+    service:
+      type: ClusterIP
+
+    httproute:
+      enabled: true
+      parentRefs:
+        - name: prod-gateway
+          namespace: gateway-system
+      hostnames:
+        - argo.enfec.cloud
+      rules:
+        - matches:
+            - path:
+                type: PathPrefix
+                value: /
+
+# Self-management: an Argo CD Application (see templates/self-application.yaml)
+# pointing back at this same chart/path in this same repo, so Argo CD
+# syncs its own deployment instead of requiring manual
+# `helm upgrade --install` runs.
+selfManage:
+  enabled: true
+  repoURL: https://github.com/RaamHorakeri/helm-manifest
+  targetRevision: main
+  path: argocd-helm-deploy
+  valueFiles:
+    - values.yaml

@@ -1,0 +1,15 @@
+apiVersion: v2
+name: envoy-gateway
+description: >
+  Envoy Gateway controller (upstream envoyproxy/gateway-helm chart) plus
+  the shared GatewayClass, Gateway ("prod-gateway" in "gateway-system"),
+  and cert-manager ClusterIssuer ("letsencrypt-prod") that every app
+  chart in this repo (go-app, go-cloud, go-engine, ...) already assumes
+  exist. See README.md before applying this to a cluster where these
+  resources already exist under different settings.
+type: application
+version: 1.0.0
+dependencies:
+  - name: gateway-helm
+    version: 1.9.0
+    repository: oci://docker.io/envoyproxy

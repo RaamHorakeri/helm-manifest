@@ -1,0 +1,25 @@
+{{- if .Values.selfManage.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd
+  namespace: {{ .Release.Namespace }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: {{ required "selfManage.repoURL is required when selfManage.enabled is true" .Values.selfManage.repoURL | quote }}
+    targetRevision: {{ .Values.selfManage.targetRevision | quote }}
+    path: {{ .Values.selfManage.path }}
+    helm:
+      valueFiles:
+        {{- toYaml .Values.selfManage.valueFiles | nindent 8 }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ .Release.Namespace }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+{{- end }}

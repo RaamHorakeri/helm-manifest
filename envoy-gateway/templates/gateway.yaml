@@ -1,0 +1,35 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ .Values.gateway.name }}
+  namespace: {{ .Values.gateway.namespace }}
+spec:
+  gatewayClassName: {{ required "gatewayClassName is required - confirm with: kubectl get gatewayclass" .Values.gatewayClassName | quote }}
+  listeners:
+    {{- if .Values.gateway.http.enabled }}
+    - name: http
+      protocol: HTTP
+      port: {{ .Values.gateway.http.port }}
+      allowedRoutes:
+        namespaces:
+          from: All
+    {{- end }}
+    {{- if .Values.gateway.https.enabled }}
+    {{- if not .Values.gateway.https.certificates }}
+    {{- fail "gateway.https.enabled is true but gateway.https.certificates is empty - add at least one {hostname, secretName} entry" }}
+    {{- end }}
+    {{- range .Values.gateway.https.certificates }}
+    - name: https-{{ .hostname | replace "." "-" }}
+      protocol: HTTPS
+      port: {{ $.Values.gateway.https.port }}
+      hostname: {{ .hostname | quote }}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: {{ .secretName }}
+            kind: Secret
+      allowedRoutes:
+        namespaces:
+          from: All
+    {{- end }}
+    {{- end }}

@@ -1,0 +1,13 @@
+apiVersion: v2
+name: argocd-helm-deploy
+description: >
+  Argo CD, wired to the shared prod-gateway Gateway (see ../envoy-gateway)
+  through the upstream chart's native Gateway API HTTPRoute support.
+  Does not install the Envoy Gateway controller, the shared Gateway, or
+  cert-manager - see ../envoy-gateway for those.
+type: application
+version: 1.0.0
+dependencies:
+  - name: argo-cd
+    version: 9.5.4
+    repository: https://argoproj.github.io/argo-helm

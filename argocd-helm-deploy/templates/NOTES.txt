@@ -1,0 +1,7 @@
+Argo CD has been deployed (release: {{ .Release.Name }}, namespace: {{ .Release.Namespace }}).
+
+Initial admin password:
+  kubectl -n {{ .Release.Namespace }} get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d
+
+HTTPRoute status:
+  kubectl -n {{ .Release.Namespace }} get httproute

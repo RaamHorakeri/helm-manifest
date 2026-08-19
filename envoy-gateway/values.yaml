@@ -1,0 +1,69 @@
+# Pass-through values for the upstream envoyproxy/gateway-helm chart.
+# Leave empty to use its defaults.
+gateway-helm: {}
+
+# Name of the GatewayClass this controller instance serves. All app
+# charts in this repo (go-app, go-cloud, ...) attach to a Gateway using
+# this class via their own `gateway.name`/`gateway.namespace` values.
+#
+# REQUIRED - do not guess. Confirm the real value against the cluster:
+#   kubectl get gatewayclass
+gatewayClassName: ""
+
+gateway:
+  # Matches the name/namespace every existing app chart in this repo
+  # already references (go-app, go-assignment, go-bifrost, go-cloud,
+  # go-engine all use gateway.name=prod-gateway, gateway.namespace=gateway-system).
+  name: prod-gateway
+  namespace: gateway-system
+
+  http:
+    enabled: true
+    port: 80
+
+  https:
+    # All app charts currently set tls.enabled: false, so HTTPS on the
+    # Gateway itself is not confirmed live yet either. Leave disabled
+    # until confirmed, then flip to true and fill in certificates below.
+    enabled: false
+    port: 443
+    # One listener per hostname (SNI-based) - never a wildcard. This
+    # list is a REFERENCE of every hostname currently used across the
+    # app charts in this repo, commented out. Confirm against the real
+    # Gateway (kubectl get gateway prod-gateway -n gateway-system -o yaml)
+    # before enabling any of these, since the actual secretName per host
+    # is not known from this repo alone.
+    certificates: []
+    # certificates:
+    #   - hostname: bifrost.enfec.cloud
+    #     secretName: bifrost-enfec-cloud-tls
+    #   - hostname: ws.enfec.cloud
+    #     secretName: ws-enfec-cloud-tls
+    #   - hostname: ws-bifrost.enfec.cloud
+    #     secretName: ws-bifrost-enfec-cloud-tls
+    #   - hostname: ws.engine.enfec.cloud
+    #     secretName: ws-engine-enfec-cloud-tls
+    #   - hostname: grpc-go-app.enfec.cloud
+    #     secretName: grpc-go-app-enfec-cloud-tls
+    #   - hostname: grpc-go-assignment.enfec.cloud
+    #     secretName: grpc-go-assignment-enfec-cloud-tls
+    #   - hostname: grpc-go-cloud.enfec.cloud
+    #     secretName: grpc-go-cloud-enfec-cloud-tls
+    #   - hostname: grpc.bifrost.enfec.cloud
+    #     secretName: grpc-bifrost-enfec-cloud-tls
+    #   - hostname: grpc.engine.enfec.cloud
+    #     secretName: grpc-engine-enfec-cloud-tls
+    #   - hostname: asyncq.bifrost.enfec.cloud
+    #     secretName: asyncq-bifrost-enfec-cloud-tls
+    #   - hostname: argo.enfec.cloud
+    #     secretName: argo-enfec-cloud-tls
+
+certManager:
+  # The app charts reference clusterIssuer: letsencrypt-prod as if it
+  # already exists. Included here so it's defined in source control
+  # rather than only existing as an unmanaged cluster resource.
+  enabled: true
+  clusterIssuer:
+    name: letsencrypt-prod
+    email: you@example.com
+    server: https://acme-v02.api.letsencrypt.org/directory

@@ -1,0 +1,6 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: {{ required "gatewayClassName is required - confirm with: kubectl get gatewayclass" .Values.gatewayClassName | quote }}
+spec:
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller
